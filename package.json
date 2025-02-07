@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://iadsl.github.io/vista-project",
+  "homepage": "https://iadsl.github.io/vista-project/reactChicagoMap",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
