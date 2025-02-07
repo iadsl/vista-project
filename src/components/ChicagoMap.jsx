@@ -31,8 +31,27 @@ const ChicagoMap = () => {
 
   const onEachArea = (feature, layer) => {
     if (feature.properties && feature.properties.community) {
-      layer.bindPopup(feature.properties.community);
+      layer.bindTooltip(feature.properties.community, {
+        permanent: false,
+        direction: 'center',
+        className: 'community-tooltip'
+      });
     }
+
+    layer.on({
+      mouseover: (e) => {
+        const layer = e.target;
+        layer.setStyle({
+          fillOpacity: 0.7
+        });
+      },
+      mouseout: (e) => {
+        const layer = e.target;
+        layer.setStyle({
+          fillOpacity: 0.3
+        });
+      }
+    });
   };
   
   return (
