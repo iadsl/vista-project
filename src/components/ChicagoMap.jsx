@@ -16,7 +16,7 @@ const ChicagoMap = () => {
   const chicagoCenter = [41.8781, -87.6298];
   
   useEffect(() => {
-    fetch('/src/data/chicago-community-areas.geojson')
+    fetch('/chicago-community-areas.geojson')
       .then(response => response.json())
       .then(data => setCommunityAreas(data));
   }, []);
