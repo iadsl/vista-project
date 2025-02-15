@@ -1,0 +1,27 @@
+.map-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.leaflet-container {
+  height: 90vh;
+  width: 90%;
+  border-radius: 10px;
+  z-index: 1;
+  margin: 0 auto;
+}
+
+.community-tooltip {
+  background: white;
+  border: none;
+  border-radius: 3px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+  padding: 4px 8px;
+}
+
+.leaflet-interactive {
+  cursor: pointer;
+}

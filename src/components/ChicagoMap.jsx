@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, ZoomControl, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -16,9 +16,17 @@ const ChicagoMap = () => {
   const chicagoCenter = [41.8781, -87.6298];
   
   useEffect(() => {
-    fetch('/chicago-community-areas.geojson')
+    fetch('/vista-project/reactChicagoMap/chicago-community-areas.geojson')
       .then(response => response.json())
-      .then(data => setCommunityAreas(data));
+      .then(data => {
+        console.log('Loaded GeoJSON:', data);
+        if (data && data.type === 'FeatureCollection') {
+          setCommunityAreas(data);
+        } else {
+          console.error('Invalid GeoJSON structure:', data);
+        }
+      })
+      .catch(error => console.error('Error loading GeoJSON:', error));
   }, []);
 
   const areaStyle = {
