@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Text, Stars, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import Orb from './Orb';
-
+import Modal from './Modal';
 
 const communityAreas = [
   { id: 1, name: "Rogers Park" },
@@ -86,19 +85,16 @@ const communityAreas = [
   { id: 77, name: "Edgewater" }
 ];
 
-
 const generatePositions = (count, radius = 10) => {
   const positions = [];
   for (let i = 0; i < count; i++) {
-    // Spherical distribution
-    const phi = Math.acos(-1 + (2 * i) / count); // Distribute points somewhat evenly
+    const phi = Math.acos(-1 + (2 * i) / count);
     const theta = Math.sqrt(count * Math.PI) * phi;
 
     const x = radius * Math.sin(phi) * Math.cos(theta);
     const y = radius * Math.sin(phi) * Math.sin(theta);
     const z = radius * Math.cos(phi);
 
-    // Add some randomness to prevent perfect alignment
     const randomFactor = 0.5;
     positions.push(
       new THREE.Vector3(
@@ -107,31 +103,20 @@ const generatePositions = (count, radius = 10) => {
         z + (Math.random() - 0.5) * randomFactor
       )
     );
-
-    // Alternative: Simple Cube distribution
-    // const x = (Math.random() - 0.5) * radius * 2;
-    // const y = (Math.random() - 0.5) * radius * 2;
-    // const z = (Math.random() - 0.5) * radius * 2;
-    // positions.push(new THREE.Vector3(x, y, z));
   }
   return positions;
 };
 
 const Lines = ({ positions, color = 'white', lineWidth = 0.5 }) => {
-  // Create lines connecting all points (can be performance intensive for many points)
-  // A simpler approach might connect each point to the center (0,0,0)
   const linesGeometry = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
     const lineVertices = [];
 
-    // Connect every point to every other point (N*(N-1)/2 lines)
     for (let i = 0; i < positions.length; i++) {
       for (let j = i + 1; j < positions.length; j++) {
         lineVertices.push(...positions[i].toArray(), ...positions[j].toArray());
       }
     }
-
-   
 
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(lineVertices, 3));
     return geometry;
@@ -146,8 +131,7 @@ const Lines = ({ positions, color = 'white', lineWidth = 0.5 }) => {
   );
 };
 
-
-const Glow = ({ position,  color = '#6099ff' }) => {
+const Glow = ({ position, color = '#6099ff' }) => {
   return (
     <sprite position={position}>
       <spriteMaterial
@@ -161,7 +145,6 @@ const Glow = ({ position,  color = '#6099ff' }) => {
   );
 };
 
-
 const Background = () => {
   return (
     <>
@@ -173,19 +156,23 @@ const Background = () => {
 
 const ChicagoOrbsVisualization = () => {
   const [selectedArea, setSelectedArea] = useState(null);
-  const [hoveredArea, setHoveredArea] = useState(null); 
+  const [hoveredArea, setHoveredArea] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Generate positions only once
   const orbPositions = useMemo(
-    () => generatePositions(communityAreas.length, 10), 
-    [] 
+    () => generatePositions(communityAreas.length, 10),
+    []
   );
 
   const handleOrbClick = (name) => {
     setSelectedArea(name);
+    setIsModalOpen(true);
   };
 
-  
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   const textDisplayStyle = {
     position: 'absolute',
     top: '20px',
@@ -196,41 +183,37 @@ const ChicagoOrbsVisualization = () => {
     borderRadius: '5px',
     fontSize: '16px',
     fontFamily: 'sans-serif',
-    zIndex: 100, 
-    pointerEvents: 'none', 
+    zIndex: 100,
+    pointerEvents: 'none',
   };
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', background: '#030817' }}>
-      {selectedArea && (
+      {selectedArea && !isModalOpen && (
         <div style={textDisplayStyle}>
           Selected: {selectedArea}
         </div>
       )}
-      
-      {hoveredArea && !selectedArea && (
-        <div style={{...textDisplayStyle, top: '70px'}}>
-          Hovering: {hoveredArea}
-        </div>
-       )} 
+
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        areaName={selectedArea}
+      />
 
       <Canvas camera={{ position: [0, 0, 20], fov: 50 }}>
         <Background />
 
-       
         <ambientLight intensity={0.8} />
         <pointLight position={[15, 15, 15]} intensity={2} color="#ffffff" />
         <pointLight position={[-15, -15, -15]} intensity={1.5} color="#c0e0ff" />
         <directionalLight position={[0, 10, 5]} intensity={1} color="#eeeeff" />
         <hemisphereLight skyColor="#93c5fd" groundColor="#3730a3" intensity={0.7} />
 
-       
         <Environment preset="city" />
 
-        
         <Glow position={[0, 0, 0]} size={20} color="#4070f4" />
 
-        
         <Suspense fallback={null}>
           {communityAreas.map((area, index) => (
             <Orb
@@ -239,14 +222,12 @@ const ChicagoOrbsVisualization = () => {
               area={area}
               onClick={handleOrbClick}
               color={`hsl(${210 + (index / communityAreas.length) * 140}, 80%, 65%)`}
-               onHover={setHoveredArea} 
+              onHover={setHoveredArea}
             />
           ))}
-          
           <Lines positions={orbPositions} color="#ffffff" />
         </Suspense>
 
-        
         <OrbitControls
           enablePan={true}
           enableZoom={true}
